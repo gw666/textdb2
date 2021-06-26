@@ -1,0 +1,263 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf600
+{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\fmodern\fcharset0 Courier;\f2\froman\fcharset0 Times-Roman;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sl560\sa321\partightenfactor0
+
+\f0\b\fs48 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 textdb.manip\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 \
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 add-fname-to-slip-text\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (add-fname-to-slip-text fname slip-text)
+\f2 \
+
+\f1 ensures that the body of text always begins w/ the current fname;\
+used to munge existing slip-maps to ensure that all slips' text\
+begin with the slip's *current* filename\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 after-str\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f2\b0\fs24 \cf2 \
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1 \cf2 \
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 all-fnames-s\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (all-fnames-s dir-path)
+\f2 \
+
+\f1 returns seq of all fnames in dir\
+\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 allobjs->fileobjs-s\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (allobjs->fileobjs-s fileobj-s)
+\f2 \
+
+\f1 IN: seq of File objects\
+OUT: filtered seq of only those File objects that are\
+     files (File objs of directories removed)\
+\
+(chop-text text-str)
+\f2 \
+
+\f1 split text into vector of <first line> <rest of text>\
+\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 dir->allobjs-s\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (dir->allobjs-s dir-path)
+\f2 \
+
+\f1 returns a seq of File objects for the given directory\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 export-to-file\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (export-to-file export-fname slip-map)
+\f2 \
+
+\f1 appends fname, contents to export-fname; if export-fname\
+does not exist, it is created\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 fileobjs->strings-s\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (fileobjs->strings-s fileobjs-s)
+\f2 \
+
+\f1 Returns the .getName property of a sequence of files, as seq\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 find-by-id\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (find-by-id slips-db id-value)
+\f2 \
+
+\f1 given an id value, return the map of the slip that has that value;\
+returns nil if nothing found\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 fname-id\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (fname-id fname)
+\f2 \
+
+\f1 derives slip's id from its filename\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 id-s\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (id-s fname-s)
+\f2 \
+
+\f1 returns a seq of id's for each filename in fname-s\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f2 \cf2 \
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1 \cf2 \
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 parent-path\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (parent-path dir-path)
+\f2 \
+
+\f1 return complete path to dir-path's parent (assumes\
+that dir-path ends with a '/')\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 pour\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (pour dir-path fname text-str)
+\f2 \
+
+\f1 creates new file, based on parameters; always appends;\
+does not depend on 'require, 'refer, 'use, elsewhere\
+in code\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 same-ids?\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (same-ids? str1 str2)
+\f2 \
+
+\f1 returns true iff two strings begin with same slip id\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 slip-map\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (slip-map dir-path fname)
+\f2 \
+
+\f1 all the data of one slip, as a single map,\
+key = id, value = [fname contents-of-slip]\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 slips-db\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (slips-db dir-path fname-seq)
+\f2 \
+
+\f1 creates a seq containing one map for each slip in the specified directory\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 \
+smap-fname\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (smap-fname slip-map)
+\f2 \
+
+\f1 get filename from slip-map\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 smap-string\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (smap-string before-str between-str after-str slip-map)
+\f2 \
+
+\f1 creates a formatted string for the specified slip-map\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 smap-text\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (smap-text slip-map)
+\f2 \
+
+\f1 get file text from slip-map\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 text-db-report\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (text-db-report a-text-db before-str between-str after-str)
+\f2 \
+
+\f1 creates a title/contents report for all slip-maps in the text-db\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 text-fnames-s\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (text-fnames-s dir-path)
+\f2 \
+
+\f1 returns seq of all text files in dir\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 truthy\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (truthy val)
+\f2 \
+
+\f1 if val=nil or false, returns false; else returns true\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 \
+txtfile-strs-only-s\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (txtfile-strs-only-s fname-s)
+\f2 \
+
+\f1 filters out all strings that do not end with either '.txt' or '.md'\
+\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\f0\b\fs28 \cf2 update-slip-map-v\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f1\b0\fs24 \cf2 (update-slip-map-v slip-map)
+\f2 \
+
+\f1 creates [fname text] of updated slip, adding fname as needed to the text\
+}
