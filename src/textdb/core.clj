@@ -1,6 +1,6 @@
 (ns textdb.core
   (:require [textdb.manip :as manip]
-;            [clj-commons-exec :as exec]
+            [clj-commons-exec :as exec]
             [clojure.pprint :as p]
   )
   (:gen-class)
@@ -23,9 +23,9 @@
   (println "\n\n")
   
   (comment
-  ;(println "--doing a Unix 'ls'")
-  ;(println (exec/sh "pwd"))
-  ;(println (exec/sh "ls"))
+  (println "--doing a Unix 'ls'")
+  (println (exec/sh "pwd"))
+  (println (exec/sh "ls"))
   )
 
   (println "found using find-by-id")
