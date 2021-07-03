@@ -6,7 +6,9 @@
   (:gen-class)
 )
   
-  
+(comment
+  (+ 2 2))  
+
 (defn -main []
 
   (println "hello")
