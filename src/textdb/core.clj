@@ -1,6 +1,6 @@
 (ns textdb.core
   (:require [textdb.manip :as manip]
-            [clj-commons-exec :as exec]
+;            [clj-commons-exec :as exec]
             [clojure.pprint :as p]
   )
   (:gen-class)
@@ -16,9 +16,12 @@
   (def currtexts-dir
     "/Users/gw/Documents/github/textdb/test/TESTDATA/test1/")
     
-  
+
   (def slips-db1 (manip/slips-db currtexts-dir))
 
+  (println "slips-db1:\n\n")
+  (println slips-db1)
+  (println "\n\n")
   
   (println "\n---testing highest functions")
   (println (manip/slip-map currtexts-dir "202102210815 emotional salience explains mental contrasting.md"))
@@ -30,7 +33,8 @@
   (println (exec/sh "ls"))
   )
 
-  (println "found using find-by-id")
+  (println "found using find-by-id:\n")
   (println (manip/find-by-id slips-db1 "202103081141"))
+
 )
 

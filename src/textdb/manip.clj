@@ -48,8 +48,8 @@
 ; *******************************************************
 
 (defn dir->allobjs-s
-  "returns a seq of *all* File objects for the given directory
-   (including those in subdirectories)"
+  "returns a seq of *all* File objects for the directory itself
+    and all the files contained in it"
   [dir-path]
   (file-seq                         ; 2. Return the directory's contents
     (clojure.java.io/file dir-path) ; 1. Get the fileobject of the directory
@@ -79,12 +79,15 @@
 (defn all-fname-s
   "returns seq of all fnames in dir (as strings)"
   [dir-path]
-    (-> 
-    (dir->allobjs-s dir-path)
-    (allobjs->fileobjs-s)
-    ([fileobj-s->string-s])
-    )
-)
+    (-> dir-path
+        (dir->allobjs-s ,,,)
+        (allobjs->fileobjs-s ,,,)  ; returns a lazy-seq
+    ;; gives error: "Key must be integer"
+         (fileobj-s->string-s ,,,))
+  ;; the above error occurs even though, when sequentially
+  ;;  executing the 3 forms interactively at the repl,
+  ;;  they produce the desired result
+        )
 
 (defn txtfile-fname-s
   "filters out all strings that do not end with either .txt or .md"
@@ -325,9 +328,9 @@
    (mapv #(spit-fname-text-pair dest-dir %1) fname-text-pair-s))
 
  ; ----------- code setup
-
+(comment
 (def srcp "/Users/gr/Dropbox/THINKING-BOXES/GW-thinking-box/")
-(def mydb (slips-db srcp))  
+(def mydb (slips-db srcp))  ;says srcp must be an integer
   
 (defn fname-in-slip-text?
   "Is the text file's name = to the first line of its contents?"
@@ -340,7 +343,7 @@
   "Returns false if any slip does not prepend the filename to the textdb"
   [my-db]
   (every?
-   true?
+   [true?]
    (mapv (partial fname-in-slip-text?) my-db)))
 
 ; ===== to build a database using the master thinking-box directory =====
@@ -391,3 +394,4 @@
 ; create tests for chop-text edge cases
 ; resume work on textdb-errors
 
+) ;end comment
