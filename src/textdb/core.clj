@@ -7,7 +7,7 @@
 )
   
 (comment
-  (def today "7/9/21a"))  
+  (def today "7/10"))  
 
 (defn -main []
 
@@ -35,5 +35,6 @@
 
   (println "found using find-by-id:\n")
   (println (manip/find-by-id slips-db1 "202103081141"))
+
   (println "\nPROGRAM ENDED SUCCESSFULLY"))
 

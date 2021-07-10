@@ -24,8 +24,8 @@
 ; * to the directory containing the text files that     *
 ; * we want to manipulate                               *
 ; *                                                     *
-; * -- allobjs-s: returns all File objects         *
-; * -- txtfile-fname-s: returns all text filenames      *
+; * -- allobjs-seq: returns all File objects         *
+; * -- txtfile-fname-seq: returns all text filenames      *
 ; * -- slip-map: returns a given text file's contents   *
 ; *      as a map                                       *
 ; * -- slips-db: returns a seq of slip-map entries, one *
@@ -43,54 +43,55 @@
 ; *    files comprising the textdb                      *
 ; * --fileobjs: File objects representing files         *
 ; * --fname: a string representing a file name          *
-; * --smap: abbreviation of 'slip-map;                  *
-; * --strings-s: a seq of (usually) filename strings    *
+; * --seqmap: abbreviation of 'slip-map;                  *
+; * --seqtrings-seq: a seq of (usually) filename strings    *
 ; * --txtfile: any file ending in '.txt' or 'md'        *
 ; *                                                     *
 ; *******************************************************
 
-(defn allobjs-s
+(defn allobjs-seq
   "returns a seq of *all* File objects for the directory itself
     and all the files contained in it"
   [dir-path]
+
+  ; gets java.io.File objects for a given path, including directories
+  ; and items in *subdirectories* (also Apple ".DS_Store" files)
+  ; -- item 0 represents the directory itself; item 1 is first file, etc.
+
   (file-seq                         ; 2. Return the directory's contents
     (clojure.java.io/file dir-path) ; 1. Get the fileobject of the directory
   ))
 
-(defn fileobjs-s  ; was 'only-files'
+(defn fileobjs-seq
     "IN: seq of File objects
      OUT: filtered seq of only those File objects that are
           files (File objs of directories removed)"
-  [fileobj-s]
-  (filter #(.isFile %) fileobj-s))
+  [allobjs-seq]
+  (filter #(.isFile %) allobjs-seq))
 
-(defn string-s  ; was 'names-s'
+; at this point, we stop working with File objects, begin
+; working with STRINGS that represent these File objects
+
+(defn filenames-seq
     "Returns the .getName property of a sequence of files, as seq"
-    [fileobjs-s]
-
-  ; gets java.io.File objects for a given path, including directories
-  ; and items in subdirectories (also Apple ".DS_Store" files)
-  ; -- item 0 represents the directory itself; item 1 is first file, etc.
-  
-  ; at this point, we stop working with File objects, begin
-  ; working with STRINGS that represent these File objects
-
-    (map #(.getName %) fileobjs-s)
+    [fileobjs-seq]
+    (map #(.getName %) fileobjs-seq)
 )
 
-(defn all-fname-s
+(defn txtfile-fnames-seq
+  "filters out all strings that do not end with .md"
+  [filenames-seq]
+  (filter #(ends-with? % ".md") filenames-seq))
+
+(defn all-fnames-seq
   "returns seq of all fnames in dir (as strings)"
   [dir-path]
     (-> dir-path
-        (allobjs-s ,,,)
-        (fileobjs-s ,,,)  ; returns a lazy-seq
-         (string-s ,,,)))
+        (allobjs-seq ,,,)
+        (fileobjs-seq ,,,)  ; returns a lazy-seqeq
+        (filenames-seq ,,,)
+        (txtfile-fnames-seq ,,,)))
 
-(defn txtfile-fname-s
-  "filters out all strings that do not end with either .txt or .md"
-  [dir-path]
-  (filter #(or (ends-with? % ".txt") (ends-with? % ".md")) (all-fname-s dir-path))
-)
 
 
 (defn fname-id
@@ -99,10 +100,10 @@
 ; --------------------------------------- 
   (re-find #"^\d{12}" fname)  
 )
-(defn id-s
-  "returns a seq of id's for each filename in fname-s"
-  [fname-s]
-  (map fname-id fname-s)
+(defn id-seq
+  "returns a seq of id's for each filename in fname-seq"
+  [fname-seq]
+  (map fname-id fname-seq)
 )
 
 ; *********************************************
@@ -112,7 +113,7 @@
 ; *********************************************
 (defn slip-map   ; aka 'smap'
   "all the data of one slip, as a single map,
-   key = id, value = [fname contents-of-slip]"
+   key = id, value = [fname contents-of-seqlip]"
   [dir-path fname]
   ; --------------------------------------- 
   (let [id     (fname-id fname)
@@ -142,7 +143,7 @@
 (defn slips-db
   "creates a seq containing one map for each slip in the specified directory"
   [dir-path]
-  (let [fname-seq (txtfile-fname-s dir-path)]
+  (let [fname-seq (txtfile-fnames-seq dir-path)]
     (map (partial slip-map dir-path) fname-seq)))
 
 (defn find-by-id
@@ -185,9 +186,9 @@
   "creates new file, based on parameters; always appends;
    does not depend on 'require, 'refer, 'use, elsewhere
    in code"
-  [dir-path fname text-str]
+  [dir-path fname text-seqtr]
   (let [full-fname (str dir-path fname)]
-    (spit full-fname text-str :append true)
+    (spit full-fname text-seqtr :append true)
   )
 )
 (defn parent-path
@@ -201,20 +202,20 @@
     (str (nth results 1) "/")
   )
 )
-(defn smap-string
+(defn smap-seqtring
   "creates a formatted string for the specified slip-map"
-  [before-str between-str after-str slip-map]
-  (str before-str (smap-fname slip-map) between-str (trimr (smap-text slip-map)) after-str)
+  [before-seqtr between-seqtr after-seqtr slip-map]
+  (str before-seqtr (smap-fname slip-map) between-seqtr (trimr (smap-text slip-map)) after-seqtr)
 )
 
 (defn text-db-report
   "creates a title/contents report for all slip-maps in the text-db"
-  [a-text-db before-str between-str after-str]
+  [a-text-db before-seqtr between-seqtr after-seqtr]
   
-  (let [partial-fcn (partial smap-string before-str between-str after-str)
-        single-reports-s (map partial-fcn a-text-db)]
+  (let [partial-fcn (partial smap-seqtring before-seqtr between-seqtr after-seqtr)
+        single-reports-seq (map partial-fcn a-text-db)]
     ; force lazy seq to be realized as a single string
-    (apply str single-reports-s)))
+    (apply str single-reports-seq)))
 
 (defn same-ids?
   "returns true iff two strings begin with same slip id"
@@ -224,29 +225,29 @@
 
 (defn chop-text
   "split text into vector of <first line> <rest of text>"
-  [text-str]
+  [text-seqtr]
   
-  ; NOTE: fcn returns error if test-str is empty...
+  ; NOTE: fcn returns error if test-seqtr is empty...
   ;       at least one "\n"; if there is none, this fcn 
   ;       appends a "\n" to the input string
   
-  (let [first-ln (second (re-find #"^(.*?)\n" text-str))
-        rest-text (second (re-find #"(?s)^.*?\n(.*)$" text-str))
+  (let [first-ln (second (re-find #"^(.*?)\n" text-seqtr))
+        rest-text (second (re-find #"(?s)^.*?\n(.*)$" text-seqtr))
         text-out (if (includes? rest-text "\n")
                          rest-text
                          (str rest-text "\n"))]
     (vector first-ln text-out)))
 
 (defn test-CR-regex  ; temporarily of use
-  [text-str]
-  (let [rest-text (second (re-find #"(?s)^.*?\n(.*)$" text-str))
+  [text-seqtr]
+  (let [rest-text (second (re-find #"(?s)^.*?\n(.*)$" text-seqtr))
        ]
-  (println "text-str  -->" text-str "<--")
+  (println "text-seqtr  -->" text-seqtr "<--")
   (println "rest-text -->" rest-text "<--")  
   )
 )
 
-(defn add-fname-to-slip-text
+(defn add-fname-to-seqlip-text
   "ensures that the body of text always begins w/ the current fname"
   [fname slip-text]
   
@@ -261,7 +262,7 @@
   )
 )
 
-(defn update-slip-map-v
+(defn update-seqlip-map-v
   "creates [fname text] from slip-map, adding fname as needed to the text"
   [slip-map]
   
@@ -273,7 +274,7 @@
        ]
     ; the function could be factored out to enable arbitrary changes
     ; to the slip text
-    (vector fname (add-fname-to-slip-text fname text-out))  
+    (vector fname (add-fname-to-seqlip-text fname text-out))  
   )  
 )
 
@@ -299,7 +300,7 @@
   
   (let [orig-textdb (slips-db orig-tbox-p)]
        
-;    (println "fnames\n" all-slips-fname-s "\n\n")
+;    (println "fnames\n" all-seqlips-fname-seq "\n\n")
 ;    (println "orig-textdb\n" orig-textdb "\n\n")
     ; result of map is a lazy seq of [filename text] for each slip-map
     ; modification-fcn outputs [fname newtext] for each slip-map in orig-textdb
@@ -319,29 +320,29 @@
 )
 
 (defn spit-new-textdb
-   "Create, in dest-dir, one slip text-file for each [fname text] pair in fname-text-pair-s"
-   [dest-dir fname-text-pair-s]
-   (println "size of fname-text-pair-s is" (count fname-text-pair-s))
-   (mapv #(spit-fname-text-pair dest-dir %1) fname-text-pair-s))
+   "Create, in dest-dir, one slip text-file for each [fname text] pair in fname-text-pair-seq"
+   [dest-dir fname-text-pair-seq]
+   (println "size of fname-text-pair-seq is" (count fname-text-pair-seq))
+   (mapv #(spit-fname-text-pair dest-dir %1) fname-text-pair-seq))
 
  ; ----------- code setup
 (comment
 (def srcp "/Users/gr/Dropbox/THINKING-BOXES/GW-thinking-box/")
 (def mydb (slips-db srcp))  ;says srcp must be an integer
   
-(defn fname-in-slip-text?
+(defn fname-in-seqlip-text?
   "Is the text file's name = to the first line of its contents?"
-  [my-smap]
+  [my-seqmap]
   (=
-   (my-smap :fname)
-   (first (split (my-smap :text) #"\n" 2))))
+   (my-seqmap :fname)
+   (first (split (my-seqmap :text) #"\n" 2))))
 
 (defn fnames-added-to-text?
   "Returns false if any slip does not prepend the filename to the textdb"
   [my-db]
   (every?
    [true?]
-   (mapv (partial fname-in-slip-text?) my-db)))
+   (mapv (partial fname-in-seqlip-text?) my-db)))
 
 ; ===== to build a database using the master thinking-box directory =====
 
@@ -351,7 +352,7 @@
 (defn munge-db
   "munge the textdb, as given by srcpath and destpath, re-creating the text db in the destpath directory (which should be empty)"
   [srcpath destpath]
-  (let [my-fname-text-pairs-ts (munge-thinking-box srcpath update-slip-map-v)]
+  (let [my-fname-text-pairs-ts (munge-thinking-box srcpath update-seqlip-map-v)]
     (spit-new-textdb destpath my-fname-text-pairs-ts)))
  
 ; MANUAL STEPS TO PERFORM AFTER RUNNING MUNGE-DB:
@@ -368,7 +369,7 @@
 ; 
 
 
-(defn fname-begins-slip-text?
+(defn fname-begins-seqlip-text?
     "Returns true if the same, name of file if file's line 0 is not filename"
     [smap]
     (let [atext   (smap :text)
@@ -381,7 +382,7 @@
   "checks for first-line errors in textdb contents"
   [db-path]
   (let [my-db   (slips-db db-path)]
-    (mapv fname-begins-slip-text? my-db)))
+    (mapv fname-begins-seqlip-text? my-db)))
 
 ; START HERE FOR TEXTDB-ERRORS
 ; chop-text has execn errors if no text or [text but no CR]
