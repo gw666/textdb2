@@ -24,7 +24,7 @@
 ; * to the directory containing the text files that     *
 ; * we want to manipulate                               *
 ; *                                                     *
-; * -- dir->allobjs-s: returns all File objects         *
+; * -- allobjs-s: returns all File objects         *
 ; * -- txtfile-fname-s: returns all text filenames      *
 ; * -- slip-map: returns a given text file's contents   *
 ; *      as a map                                       *
@@ -49,7 +49,7 @@
 ; *                                                     *
 ; *******************************************************
 
-(defn dir->allobjs-s
+(defn allobjs-s
   "returns a seq of *all* File objects for the directory itself
     and all the files contained in it"
   [dir-path]
@@ -57,14 +57,14 @@
     (clojure.java.io/file dir-path) ; 1. Get the fileobject of the directory
   ))
 
-(defn allobjs->fileobjs-s  ; was 'only-files'
+(defn fileobjs-s  ; was 'only-files'
     "IN: seq of File objects
      OUT: filtered seq of only those File objects that are
           files (File objs of directories removed)"
   [fileobj-s]
   (filter #(.isFile %) fileobj-s))
 
-(defn fileobj-s->string-s  ; was 'names-s'
+(defn string-s  ; was 'names-s'
     "Returns the .getName property of a sequence of files, as seq"
     [fileobjs-s]
 
@@ -82,14 +82,9 @@
   "returns seq of all fnames in dir (as strings)"
   [dir-path]
     (-> dir-path
-        (dir->allobjs-s ,,,)
-        (allobjs->fileobjs-s ,,,)  ; returns a lazy-seq
-    ;; gives error: "Key must be integer"
-         (fileobj-s->string-s ,,,))
-  ;; the above error occurs even though, when sequentially
-  ;;  executing the 3 forms interactively at the repl,
-  ;;  they produce the desired result
-        )
+        (allobjs-s ,,,)
+        (fileobjs-s ,,,)  ; returns a lazy-seq
+         (string-s ,,,)))
 
 (defn txtfile-fname-s
   "filters out all strings that do not end with either .txt or .md"

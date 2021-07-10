@@ -36,7 +36,7 @@ Note that the first line of the file is the filename itself, followed by a blank
   [of type '.md' ] in a directory of files)
   
 * '->' (in a function name): what's on the left of '->' is the
-  input, what's on the right is the output (e.g., fileobj-s->string-s,
+  input, what's on the right is the output (e.g., string-s,
   meaning 'given a sequence of fileobj(s), return a sequence of string(s))
   
 * slip-map (both a noun and a function): In this package, a slip
