@@ -12,7 +12,7 @@
 ; *                                                     *
 ; * NOTE: This project is about making reports from     *
 ; * different subsets of the primary text-db. However,  *
-; * *any* seq of slip-maps is a kind of "text database" *
+; * *any* seq of slipmaps is a kind of "text database" *
 ; * and such "minor" text-dbs will be manipulated (by,  *
 ; * for example, text-db-report)                        *
 ; *                                                     *
@@ -26,9 +26,9 @@
 ; *                                                     *
 ; * -- allobjs-seq: returns all File objects         *
 ; * -- txtfile-fname-seq: returns all text filenames      *
-; * -- slip-map: returns a given text file's contents   *
+; * -- slipmap: returns a given text file's contents   *
 ; *      as a map                                       *
-; * -- slips-db: returns a seq of slip-map entries, one *
+; * -- slips-db: returns a seq of slipmap entries, one *
 ; *      for each text file in the specified directory  *
 ; *                                                     *
 ; *******************************************************
@@ -43,8 +43,7 @@
 ; *    files comprising the textdb                      *
 ; * --fileobjs: File objects representing files         *
 ; * --fname: a string representing a file name          *
-; * --seqmap: abbreviation of 'slip-map;                  *
-; * --seqtrings-seq: a seq of (usually) filename strings    *
+; * --strings-seq: a seq of (usually) filename strings  *
 ; * --txtfile: any file ending in '.txt' or 'md'        *
 ; *                                                     *
 ; *******************************************************
@@ -111,7 +110,7 @@
 ; * NOTE: requires dir-path to work correctly *
 ; *                                           *
 ; *********************************************
-(defn slip-map   ; aka 'smap'
+(defn slip-map   ; aka 'slipmap'
   "all the data of one slip, as a single map,
    key = id, value = [fname contents-of-seqlip]"
   [dir-path fname]
@@ -127,18 +126,6 @@
   )
 )
 
-(defn smap-fname
-  "get filename from slip-map"
-  [slip-map]
-  ; --------------------------------------- 
-  (:fname slip-map)
-)
-(defn smap-text
-  "get file text from slip-map"
-  [slip-map]
-  ; --------------------------------------- 
-  (:text slip-map)
-)
 
 (defn slips-db
   "creates a seq containing one map for each slip in the specified directory"
@@ -169,10 +156,10 @@
   ; may be wrong approach
   "appends fname, contents to export-fname; if export-fname
    does not exist, it is created"
-  [export-fname slip-map]
+  [export-fname slipmap]
   
-  (let [slip-fname   (smap-fname slip-map)
-        slip-text    (smap-text  slip-map)
+  (let [slip-fname   ((slipmap :fname) slipmap)
+        slip-text    ((slipmap :text)  slipmap)
        ]
        (spit export-fname (str slip-fname "\n-----\n\n") :append true)
        (spit export-fname (str slip-text
@@ -202,17 +189,17 @@
     (str (nth results 1) "/")
   )
 )
-(defn smap-seqtring
-  "creates a formatted string for the specified slip-map"
-  [before-seqtr between-seqtr after-seqtr slip-map]
-  (str before-seqtr (smap-fname slip-map) between-seqtr (trimr (smap-text slip-map)) after-seqtr)
+(defn slipmap-seqtring
+  "creates a formatted string for the specified slipmap"
+  [before-seqtr between-seqtr after-seqtr slipmap]
+  (str before-seqtr ((slipmap :fname) slipmap) between-seqtr (trimr ((slipmap :text) slipmap)) after-seqtr)
 )
 
 (defn text-db-report
-  "creates a title/contents report for all slip-maps in the text-db"
+  "creates a title/contents report for all slipmaps in the text-db"
   [a-text-db before-seqtr between-seqtr after-seqtr]
   
-  (let [partial-fcn (partial smap-seqtring before-seqtr between-seqtr after-seqtr)
+  (let [partial-fcn (partial slipmap-seqtring before-seqtr between-seqtr after-seqtr)
         single-reports-seq (map partial-fcn a-text-db)]
     ; force lazy seq to be realized as a single string
     (apply str single-reports-seq)))
@@ -263,8 +250,8 @@
 )
 
 (defn update-seqlip-map-v
-  "creates [fname text] from slip-map, adding fname as needed to the text"
-  [slip-map]
+  "creates [fname text] from slipmap, adding fname as needed to the text"
+  [slipmap]
   
   (let [fname (slip-map :fname)
         slip-text (slip-map :text)
@@ -280,7 +267,7 @@
 
 
 #_(defn usmv-test ;debugging only
-  [mytext slip-map]
+  [mytext slipmap]
   
   (let [fname (slip-map :fname)
         slip-text (slip-map :text)
@@ -302,8 +289,8 @@
        
 ;    (println "fnames\n" all-seqlips-fname-seq "\n\n")
 ;    (println "orig-textdb\n" orig-textdb "\n\n")
-    ; result of map is a lazy seq of [filename text] for each slip-map
-    ; modification-fcn outputs [fname newtext] for each slip-map in orig-textdb
+    ; result of map is a lazy seq of [filename text] for each slipmap
+    ; modification-fcn outputs [fname newtext] for each slipmap in orig-textdb
     (mapv modification-fcn orig-textdb)
   )
 )
@@ -371,9 +358,9 @@
 
 (defn fname-begins-seqlip-text?
     "Returns true if the same, name of file if file's line 0 is not filename"
-    [smap]
-    (let [atext   (smap :text)
-          fname   (smap :fname)
+    [slipmap]
+    (let [atext   (slipmap :text)
+          fname   (slipmap :fname)
           line0   (get (chop-text atext) 0)]
       (if (= fname line0) true fname)))
 
