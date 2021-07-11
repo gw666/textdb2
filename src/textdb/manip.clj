@@ -3,8 +3,7 @@
       [clojure.string :refer [ends-with? includes? split trimr]]
       [clojure.java.io :only [file]]
   )
-  (:gen-class)
-)
+  (:gen-class))
 
 (def track-this-file-into-github-repository "feel free to delete this as needed")
 
@@ -74,15 +73,14 @@
 (defn filenames-seq
     "Returns the .getName property of a sequence of files, as seq"
     [fileobjs-seq]
-    (map #(.getName %) fileobjs-seq)
-)
+    (map #(.getName %) fileobjs-seq))
 
 (defn txtfile-fnames-seq
   "filters out all strings that do not end with .md"
   [filenames-seq]
   (filter #(ends-with? % ".md") filenames-seq))
 
-(defn all-fnames-seq
+(defn all-textfile-fnames-seq
   "returns seq of all fnames in dir (as strings)"
   [dir-path]
     (-> dir-path
@@ -91,46 +89,41 @@
         (filenames-seq ,,,)
         (txtfile-fnames-seq ,,,)))
 
-
-
 (defn fname-id
   "derives slip's id from its filename"
   [fname]
 ; --------------------------------------- 
-  (re-find #"^\d{12}" fname)  
-)
+  (re-find #"^\d{12}" fname))
+
 (defn id-seq
   "returns a seq of id's for each filename in fname-seq"
   [fname-seq]
-  (map fname-id fname-seq)
-)
+  (map fname-id fname-seq))
 
-; *********************************************
-; *                                           *
-; * NOTE: requires dir-path to work correctly *
-; *                                           *
-; *********************************************
+; ***********************************************
+; *                                             *
+; * NOTE: requires dir-path to be set correctly *
+; *                                             *
+; ***********************************************
 (defn slip-map   ; aka 'slipmap'
   "all the data of one slip, as a single map,
    key = id, value = [fname contents-of-seqlip]"
   [dir-path fname]
   ; --------------------------------------- 
   (let [id     (fname-id fname)
-          ;;line 0 = id; line 1-N = the file's contents
+        ; line 0 = same as filename
+        ; line 1-N = the file's contents
         text   (slurp (str dir-path fname))
         text-out (if (empty? text) "\n" text)
        ]
 ;    (println "id/text: " id "[" text-out "]")
 ;    (println "Is text empty?: " (empty? text) "\n")
-    (hash-map :id id, :fname fname, :text text-out) 
-  )
-)
-
+    (hash-map :id id, :fname fname, :text text-out)))
 
 (defn slips-db
   "creates a seq containing one map for each slip in the specified directory"
   [dir-path]
-  (let [fname-seq (txtfile-fnames-seq dir-path)]
+  (let [fname-seq (all-textfile-fnames-seq dir-path)]
     (map (partial slip-map dir-path) fname-seq)))
 
 (defn find-by-id
@@ -138,20 +131,20 @@
    returns nil if nothing found"
   [slips-db id]
 ; NOTE: returns map, not *seq* containing the map
-  (first (filter #(= id (% :id)) slips-db))
-)
+  (first (filter #(= id (% :id)) slips-db)))
+
 (defn find-by-fname
   "given an id value, return the map of the slip that has that value;
    returns nil if nothing found"
   [slips-db fname]
 ; NOTE: returns map, not *seq* containing the map
-  (first (filter #(= fname (% :fname)) slips-db))
-)
+  (first (filter #(= fname (% :fname)) slips-db)))
+
 (defn truthy
   "if val=nil or false, returns false; else returns true"
   [val]
-  (not (or (nil? val) (false? val)))
-)
+  (not (or (nil? val) (false? val))))
+
 (defn export-to-file
   ; may be wrong approach
   "appends fname, contents to export-fname; if export-fname
@@ -165,19 +158,16 @@
        (spit export-fname (str slip-text
                            "\n--------------------------------------------\n\n\n"
                            )
-                           :append true
-       )
-  )
-)
+                           :append true)))
+
 (defn pour   ;may be wrong approach
   "creates new file, based on parameters; always appends;
    does not depend on 'require, 'refer, 'use, elsewhere
    in code"
   [dir-path fname text-seqtr]
   (let [full-fname (str dir-path fname)]
-    (spit full-fname text-seqtr :append true)
-  )
-)
+    (spit full-fname text-seqtr :append true)))
+
 (defn parent-path
   "return complete path to dir-path's parent (assumes
    that dir-path ends with a '/')"
@@ -186,14 +176,14 @@
   (let [results (re-find #"^(.*)/.*/$" dir-path)]
     ; append "/" to make it easy to append filename
     ; and have it be a valid absolute path
-    (str (nth results 1) "/")
-  )
-)
-(defn slipmap-seqtring
+    (str (nth results 1) "/")))
+
+(defn slipmap-string
   "creates a formatted string for the specified slipmap"
   [before-seqtr between-seqtr after-seqtr slipmap]
-  (str before-seqtr ((slipmap :fname) slipmap) between-seqtr (trimr ((slipmap :text) slipmap)) after-seqtr)
-)
+  (str before-seqtr ((slipmap :fname) slipmap)
+       between-seqtr (trimr ((slipmap :text) slipmap))
+      after-seqtr))
 
 (defn text-db-report
   "creates a title/contents report for all slipmaps in the text-db"
@@ -230,9 +220,7 @@
   (let [rest-text (second (re-find #"(?s)^.*?\n(.*)$" text-seqtr))
        ]
   (println "text-seqtr  -->" text-seqtr "<--")
-  (println "rest-text -->" rest-text "<--")  
-  )
-)
+  (println "rest-text -->" rest-text "<--")))
 
 (defn add-fname-to-seqlip-text
   "ensures that the body of text always begins w/ the current fname"
@@ -243,11 +231,8 @@
         rest-text   (nth chopped-text 1)
        ]
     (if (same-ids? line-1 fname)
-      (str fname "\n" rest-text)  ; if fname is already on line 1
-      (str fname "\n" slip-text)  ; if it is *not* on line 1
-    )
-  )
-)
+      (str fname "\n" rest-text)    ; if fname is already on line 1
+      (str fname "\n" slip-text))))  ; if it is *not* on line 1
 
 (defn update-seqlip-map-v
   "creates [fname text] from slipmap, adding fname as needed to the text"
@@ -261,9 +246,7 @@
        ]
     ; the function could be factored out to enable arbitrary changes
     ; to the slip text
-    (vector fname (add-fname-to-seqlip-text fname text-out))  
-  )  
-)
+    (vector fname (add-fname-to-seqlip-text fname text-out))))
 
 
 #_(defn usmv-test ;debugging only
@@ -291,9 +274,7 @@
 ;    (println "orig-textdb\n" orig-textdb "\n\n")
     ; result of map is a lazy seq of [filename text] for each slipmap
     ; modification-fcn outputs [fname newtext] for each slipmap in orig-textdb
-    (mapv modification-fcn orig-textdb)
-  )
-)
+    (mapv modification-fcn orig-textdb)))
 
 (defn spit-fname-text-pair
   "Given [fname text] of one slip, reconstitute the file in directory dir-path"
@@ -302,9 +283,7 @@
         slip-text  (nth fname-text-pair 1)
         full-fname (str dir-path slip-fname "/")
        ]
-    (spit full-fname slip-text)
-  )  
-)
+    (spit full-fname slip-text)))
 
 (defn spit-new-textdb
    "Create, in dest-dir, one slip text-file for each [fname text] pair in fname-text-pair-seq"
@@ -313,10 +292,13 @@
    (mapv #(spit-fname-text-pair dest-dir %1) fname-text-pair-seq))
 
  ; ----------- code setup
+
 (comment
+  (ns textdb.scratchpad)
+
 (def srcp "/Users/gr/Dropbox/THINKING-BOXES/GW-thinking-box/")
 (def mydb (slips-db srcp))  ;says srcp must be an integer
-  
+
 (defn fname-in-seqlip-text?
   "Is the text file's name = to the first line of its contents?"
   [my-seqmap]
@@ -341,7 +323,7 @@
   [srcpath destpath]
   (let [my-fname-text-pairs-ts (munge-thinking-box srcpath update-seqlip-map-v)]
     (spit-new-textdb destpath my-fname-text-pairs-ts)))
- 
+
 ; MANUAL STEPS TO PERFORM AFTER RUNNING MUNGE-DB:
 ; diff the two directories to confirm correctness
 ; copy 'media' folder to 'new'
@@ -357,12 +339,12 @@
 
 
 (defn fname-begins-seqlip-text?
-    "Returns true if the same, name of file if file's line 0 is not filename"
-    [slipmap]
-    (let [atext   (slipmap :text)
-          fname   (slipmap :fname)
-          line0   (get (chop-text atext) 0)]
-      (if (= fname line0) true fname)))
+  "Returns true if the same, name of file if file's line 0 is not filename"
+  [slipmap]
+  (let [atext   (slipmap :text)
+        fname   (slipmap :fname)
+        line0   (get (chop-text atext) 0)]
+    (if (= fname line0) true fname)))
 
 ; NOTE: must confirm munge-db works before continuing
 (defn textdb-errors
@@ -379,4 +361,4 @@
 ; create tests for chop-text edge cases
 ; resume work on textdb-errors
 
-) ;end comment
+) ; end comment
