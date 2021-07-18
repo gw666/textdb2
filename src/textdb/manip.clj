@@ -191,19 +191,12 @@
          "\n\n"
          slip-text)))
 
-(defn pour   ;may be wrong approach
-  "creates new file, based on parameters; always appends;
-   does not depend on 'require, 'refer, 'use, elsewhere
-   in code"
-  [dir-path fname text-str]
-  (let [full-fname (str dir-path fname)]
-    (spit full-fname text-str :append true)))
 
 (defn parent-path
   "return complete path to dir-path's parent (assumes
    that dir-path ends with a '/')"
   [dir-path]
-  ; example: "/a/b/c/d" returns "/a/b/c/"
+  ; example: "/a/b/c/d/ returns "/a/b/c/"
   (let [results (re-find #"^(.*)/.*/$" dir-path)]
     ; append "/" to make it easy to append filename
     ; and have it be a valid absolute path
